@@ -6,13 +6,24 @@
 
 1. ติดตั้ง Python 3.8 หรือใหม่กว่า
 2. ติดตั้ง Ollama จาก https://ollama.ai
-3. ติดตั้ง Dependencies:
+3. ติดตั้ง Ollama Model:
 ```bash
-pip install -r requirements.txt
+   ollama pull llama3.2
 ```
-4. ติดตั้ง Ollama Model:
+
+4. สร้าง Virtual Environment
 ```bash
-ollama pull llama3.2
+   create virtual environment python -m venv venv
+```
+
+5. เข้าใช้งาน venv
+```bash
+   venv\Scripts\activate
+```   
+
+6. ติดตั้ง Dependencies:
+```bash
+   pip install -r requirements.txt
 ```
 
 ## การเตรียมข้อมูล
@@ -23,22 +34,12 @@ ollama pull llama3.2
 
 ## การรันระบบ
 
-1. เริ่ม Ollama Server:
-```bash
-ollama serve
-```
-
-2. ติดตั้ง package สำหรับ Run ใน Gpu
-```bash
-pip install faiss-gpu torch
-```
-
-3. รันแอปพลิเคชัน:
+1. รันแอปพลิเคชัน:
 ```bash
 python thai_law_rag.py
 ```
 
-3. เปิดเว็บบราวเซอร์ไปที่ http://localhost:5000
+2. เปิดเว็บบราวเซอร์ไปที่ http://localhost:5000
 
 ## วิธีใช้งาน
 
