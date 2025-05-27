@@ -11,7 +11,7 @@
    ollama pull llama3.2
 ```
 
-4. สร้าง Virtual Environment
+4. สร้าง Virtual Environment (ถ้ายังไม่สร้าง)
 ```bash
    create virtual environment python -m venv venv
 ```
