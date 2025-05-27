@@ -9,7 +9,8 @@ from typing import List
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from flask import Flask, request, render_template, jsonify
-
+# กำหนดค่าพื้นฐาน
+# สำหรับการใช้งาน Ollama และโฟลเดอร์ข้อมูล
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"  # ตรวจสอบชื่อให้ตรงกับที่ติดตั้งจริง
 FOLDER_PATHS = ["data", "family"]  # แก้ไขเป็น 3 folders
@@ -20,6 +21,7 @@ TEXTS_PATH = "texts.json"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"🖥️ ใช้งานบน: {device.upper()}")
 
+# สร้าง Flask app
 app = Flask(__name__)
 embedder = SentenceTransformer("intfloat/multilingual-e5-base")
 embedder.to(device)  # ย้าย model ไปที่ GPU
@@ -28,6 +30,7 @@ embedder.to(device)  # ย้าย model ไปที่ GPU
 texts = []
 index = None
 
+# ฟังก์ชันสำหรับโหลดกฎหมายจากไฟล์ JSON
 def load_laws(filepath: str) -> List[str]:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -53,6 +56,7 @@ def load_laws(filepath: str) -> List[str]:
         
     return results
 
+# ฟังก์ชันสำหรับโหลดกฎหมายจากโฟลเดอร์
 def load_laws_from_folders(folder_paths: List[str]) -> List[str]:
     all_texts = []
     for folder_path in folder_paths:
@@ -81,6 +85,7 @@ def load_laws_from_folders(folder_paths: List[str]) -> List[str]:
     print(f"📊 สรุป: โหลดข้อมูลทั้งหมด {len(all_texts)} มาตรา จาก {len(folder_paths)} โฟลเดอร์")
     return all_texts
 
+# ฟังก์ชันสำหรับสร้าง embeddings และ FAISS index
 def embed_chunks(texts: List[str], batch_size: int = 16) -> np.ndarray:
     print("🔍 สร้าง Embeddings...")
     return embedder.encode(texts, batch_size=batch_size, show_progress_bar=True,
@@ -99,12 +104,13 @@ def build_faiss_index(embeddings: np.ndarray) -> faiss.IndexFlatIP:
     index.add(embeddings)
     return index
 
+# ฟังก์ชันสำหรับค้นหาบริบทที่คล้ายกัน
 def search_similar_contexts(query: str, texts: List[str], index: faiss.IndexFlatIP, top_k: int = 5) -> List[str]:
     print("🧠 ค้นหาข้อมูล...")
     query_embedding = embedder.encode([query], convert_to_numpy=True, normalize_embeddings=True, device=device)
     scores, indices = index.search(query_embedding, top_k)
 
-    threshold = 0.3  # ลด threshold เล็กน้อย
+    threshold = 0.5  # threshold สำหรับคะแนนความคล้าย
     filtered_results = [(texts[i], scores[0][idx]) for idx, i in enumerate(indices[0])
                         if scores[0][idx] > threshold]
 
@@ -116,6 +122,7 @@ def search_similar_contexts(query: str, texts: List[str], index: faiss.IndexFlat
     filtered_results.sort(key=lambda x: x[1], reverse=True)
     return [text for text, _ in filtered_results]
 
+# ฟังก์ชันสำหรับสร้างคำตอบจาก Ollama
 def generate_answer_ollama(context: str, query: str, max_tokens: int = 512) -> str:
     print("🔍 วิเคราะห์บริบทกฎหมายที่เกี่ยวข้อง...")
     
@@ -164,13 +171,16 @@ def generate_answer_ollama(context: str, query: str, max_tokens: int = 512) -> s
     except Exception as e:
         return f"❌ เกิดข้อผิดพลาด: {str(e)}"
 
+# Flask routes
 @app.route('/')
 def home():
     return render_template('index.html')
 
+
 @app.route('/health')
 def health():
     return jsonify({"status": "ok"})
+
 
 @app.route('/query', methods=['POST'])
 def query():
