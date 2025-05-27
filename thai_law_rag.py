@@ -13,7 +13,7 @@ from flask import Flask, request, render_template, jsonify
 # สำหรับการใช้งาน Ollama และโฟลเดอร์ข้อมูล
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"  # ตรวจสอบชื่อให้ตรงกับที่ติดตั้งจริง
-FOLDER_PATHS = ["data", "family"]  # แก้ไขเป็น 3 folders
+FOLDER_PATHS = ["data", "family"]  # ใช้ 2 folders
 INDEX_PATH = "faiss.index"
 TEXTS_PATH = "texts.json"
 
